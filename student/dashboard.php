@@ -26,11 +26,24 @@ include '../inc/header.php';
     </div>
     <div class="card">
         <h3 class="mt-0">Latest Result</h3>
-        <?php if ($latest_quiz) { ?>
-            <p><strong>Score:</strong> <?php echo intval($latest_quiz['score']); ?> / <?php echo intval($latest_quiz['total_questions']); ?></p>
-            <p class="mb-1"><strong>Top 1:</strong> <?php echo esc($latest_quiz['top1_intelligence']); ?></p>
-            <p class="mb-1"><strong>Top 2:</strong> <?php echo esc($latest_quiz['top2_intelligence']); ?></p>
-            <p class="mb-1"><strong>Top 3:</strong> <?php echo esc($latest_quiz['top3_intelligence']); ?></p>
+        <?php if ($latest_quiz) {
+            $lq_score = intval($latest_quiz['score']);
+            $lq_total = intval($latest_quiz['total_questions']);
+            $lq_pct = ($lq_total > 0) ? round(($lq_score / $lq_total) * 100, 2) : 0;
+            $lq_passed = is_passed($lq_score, $lq_total, $con);
+        ?>
+            <p><strong>Score:</strong> <?php echo $lq_score; ?> / <?php echo $lq_total; ?> (<?php echo $lq_pct; ?>%)</p>
+            <div class="progress mb-2">
+                <span style="width:<?php echo intval($lq_pct); ?>%"></span>
+            </div>
+            <p>
+                <strong>Result:</strong>
+                <?php if ($lq_passed) { ?>
+                    <span class="result-pass">PASSED</span>
+                <?php } else { ?>
+                    <span class="result-fail">FAILED</span>
+                <?php } ?>
+            </p>
             <a class="btn btn-light" href="result.php?quiz_id=<?php echo intval($latest_quiz['quiz_id']); ?>">View Full Result</a>
         <?php } else { ?>
             <p class="muted">No quiz taken yet.</p>

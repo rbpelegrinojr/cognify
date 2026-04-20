@@ -52,6 +52,12 @@ while ($row = mysqli_fetch_assoc($details)) {
     }
 }
 
+$intelligence_totals = analyze_top_intelligences($category_scores);
+$intelligence_descriptions = get_intelligence_descriptions();
+$overall_percent = (intval($quiz['total_questions']) > 0) ? round((intval($quiz['score']) / intval($quiz['total_questions'])) * 100, 2) : 0;
+$passed = is_passed(intval($quiz['score']), intval($quiz['total_questions']), $con);
+$passing_score = get_passing_score($con);
+
 $page_title = 'Quiz Result';
 $asset_prefix = '../';
 $nav_links = $is_admin_view ? array(
@@ -64,18 +70,28 @@ $nav_links = $is_admin_view ? array(
 );
 include '../inc/header.php';
 ?>
+<div class="no-print mb-2">
+    <button class="btn" onclick="window.print();">Print Result</button>
+</div>
+
 <div class="grid grid-2">
     <div class="card">
         <h2 class="mt-0">Quiz Summary</h2>
         <p><strong>Student:</strong> <?php echo esc($quiz['full_name']); ?> (<?php echo esc($quiz['student_no']); ?>)</p>
-        <p><strong>Score:</strong> <?php echo intval($quiz['score']); ?> / <?php echo intval($quiz['total_questions']); ?></p>
+        <p><strong>Score:</strong> <?php echo intval($quiz['score']); ?> / <?php echo intval($quiz['total_questions']); ?> (<?php echo $overall_percent; ?>%)</p>
         <div class="progress mb-2">
-            <span style="width:<?php echo intval(($quiz['score'] / max(1, $quiz['total_questions'])) * 100); ?>%"></span>
+            <span style="width:<?php echo intval($overall_percent); ?>%"></span>
         </div>
-        <p class="mb-1"><strong>Top 1 Intelligence:</strong> <?php echo esc($quiz['top1_intelligence']); ?></p>
-        <p class="mb-1"><strong>Top 2 Intelligence:</strong> <?php echo esc($quiz['top2_intelligence']); ?></p>
-        <p class="mb-1"><strong>Top 3 Intelligence:</strong> <?php echo esc($quiz['top3_intelligence']); ?></p>
-        <p class="small muted">Generated automatically based on category strengths from Remember to Create.</p>
+        <p>
+            <strong>Result:</strong>
+            <?php if ($passed) { ?>
+                <span class="result-pass">PASSED</span>
+            <?php } else { ?>
+                <span class="result-fail">FAILED</span>
+            <?php } ?>
+            <span class="muted small">(Passing score: <?php echo intval($passing_score); ?>%)</span>
+        </p>
+        <p class="small muted">Taken on: <?php echo esc($quiz['taken_at']); ?></p>
     </div>
     <div class="card">
         <h3 class="mt-0">Category Performance</h3>
@@ -91,6 +107,28 @@ include '../inc/header.php';
             </div>
         <?php } ?>
     </div>
+</div>
+
+<div class="card mt-2">
+    <h3 class="mt-0">Multiple Intelligences Analysis</h3>
+    <p class="muted small">Scores are computed from your category performance mapped to Howard Gardner's Multiple Intelligences.</p>
+    <?php
+    $max_intelligence_score = count($intelligence_totals) > 0 ? max(array_values($intelligence_totals)) : 1;
+    foreach ($intelligence_totals as $intelligence_name => $raw_score) {
+        $intel_percent = ($max_intelligence_score > 0) ? round(($raw_score / $max_intelligence_score) * 100, 1) : 0;
+        $description = isset($intelligence_descriptions[$intelligence_name]) ? $intelligence_descriptions[$intelligence_name] : '';
+    ?>
+        <div class="intelligence-item mb-2">
+            <div class="flex-between">
+                <strong><?php echo esc($intelligence_name); ?></strong>
+                <span><?php echo $intel_percent; ?>%</span>
+            </div>
+            <div class="progress"><span style="width:<?php echo $intel_percent; ?>%"></span></div>
+            <?php if ($description !== '') { ?>
+                <p class="muted small intelligence-desc"><?php echo esc($description); ?></p>
+            <?php } ?>
+        </div>
+    <?php } ?>
 </div>
 
 <div class="card mt-2">

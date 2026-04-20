@@ -7,6 +7,7 @@ $sql = "SELECT qz.*, s.student_no, s.full_name
         INNER JOIN students s ON s.student_id = qz.student_id
         ORDER BY qz.quiz_id DESC";
 $res = mysqli_query($con, $sql);
+$passing_score = get_passing_score($con);
 
 $page_title = 'Student Results';
 $asset_prefix = '../';
@@ -25,21 +26,28 @@ include '../inc/header.php';
             <tr>
                 <th>Student</th>
                 <th>Score</th>
-                <th>Top 3 Intelligence</th>
+                <th>Result</th>
                 <th>Taken On</th>
                 <th>Details</th>
             </tr>
-            <?php while ($row = mysqli_fetch_assoc($res)) { ?>
+            <?php while ($row = mysqli_fetch_assoc($res)) {
+                $total = intval($row['total_questions']);
+                $score = intval($row['score']);
+                $pct = ($total > 0) ? round(($score / $total) * 100, 2) : 0;
+                $row_passed = is_passed($score, $total, $con);
+            ?>
                 <tr>
                     <td>
                         <strong><?php echo esc($row['full_name']); ?></strong><br>
                         <span class="muted"><?php echo esc($row['student_no']); ?></span>
                     </td>
-                    <td><?php echo intval($row['score']); ?> / <?php echo intval($row['total_questions']); ?></td>
+                    <td><?php echo $score; ?> / <?php echo $total; ?> (<?php echo $pct; ?>%)</td>
                     <td>
-                        <?php echo esc($row['top1_intelligence']); ?><br>
-                        <?php echo esc($row['top2_intelligence']); ?><br>
-                        <?php echo esc($row['top3_intelligence']); ?>
+                        <?php if ($row_passed) { ?>
+                            <span class="result-pass">PASSED</span>
+                        <?php } else { ?>
+                            <span class="result-fail">FAILED</span>
+                        <?php } ?>
                     </td>
                     <td><?php echo esc($row['taken_at']); ?></td>
                     <td><a class="btn btn-light" href="../student/result.php?quiz_id=<?php echo intval($row['quiz_id']); ?>&admin_view=1">Open</a></td>
