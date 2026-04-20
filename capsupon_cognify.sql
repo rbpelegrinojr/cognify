@@ -532,7 +532,8 @@ CREATE TABLE `settings` (
 --
 
 INSERT INTO `settings` (`setting_id`, `setting_key`, `setting_value`) VALUES
-(1, 'quiz_question_limit', '30');
+(1, 'quiz_question_limit', '30'),
+(2, 'passing_score', '50');
 
 -- --------------------------------------------------------
 

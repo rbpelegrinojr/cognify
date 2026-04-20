@@ -15,11 +15,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         mysqli_query($con, "INSERT INTO settings (setting_key, setting_value) VALUES ('quiz_question_limit', '$limit')");
     }
 
+    $passing = floatval($_POST['passing_score']);
+    if ($passing < 0 || $passing > 100) {
+        $passing = 50;
+    }
+
+    $exists_ps = mysqli_query($con, "SELECT setting_id FROM settings WHERE setting_key = 'passing_score' LIMIT 1");
+    if ($exists_ps && mysqli_num_rows($exists_ps) > 0) {
+        mysqli_query($con, "UPDATE settings SET setting_value = '$passing' WHERE setting_key = 'passing_score'");
+    } else {
+        mysqli_query($con, "INSERT INTO settings (setting_key, setting_value) VALUES ('passing_score', '$passing')");
+    }
+
     set_flash('success', 'Quiz settings updated.');
     redirect_to('settings.php');
 }
 
 $limit = get_setting($con, 'quiz_question_limit', '30');
+$passing_score = get_setting($con, 'passing_score', '50');
 $total_questions = mysqli_fetch_row(mysqli_query($con, "SELECT COUNT(*) FROM questions"));
 
 $page_title = 'Quiz Settings';
@@ -38,6 +51,11 @@ include '../inc/header.php';
             <div class="form-group">
                 <label>Total Questions to Show Per Quiz</label>
                 <input type="number" name="quiz_question_limit" min="1" value="<?php echo intval($limit); ?>" required>
+            </div>
+            <div class="form-group">
+                <label>Passing Score (%)</label>
+                <input type="number" name="passing_score" min="0" max="100" step="1" value="<?php echo intval($passing_score); ?>" required>
+                <span class="muted small">Students scoring at or above this percentage will be marked as PASSED.</span>
             </div>
             <button class="btn" type="submit">Save Settings</button>
         </form>

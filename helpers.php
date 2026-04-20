@@ -66,6 +66,32 @@ function question_category_order_case() {
         ELSE 99 END";
 }
 
+function get_intelligence_descriptions() {
+    return array(
+        'Verbal–Linguistic Intelligence' => 'Strong ability in reading, writing, storytelling, and memorizing words and dates. Tends to learn best by reading, taking notes, and listening to lectures.',
+        'Logical–Mathematical Intelligence' => 'Strong ability in logic, abstractions, reasoning, numbers, and critical thinking. Tends to learn best by categorizing, classifying, and working with abstract patterns.',
+        'Spatial Intelligence' => 'Strong ability in visualizing and mentally manipulating objects. Good with maps, charts, diagrams, and puzzles. Tends to learn best through drawings, verbal and physical imagery.',
+        'Bodily–Kinesthetic Intelligence' => 'Strong ability in controlling body movements and handling objects skillfully. Tends to learn best through physical activity, hands-on learning, acting out, and role playing.',
+        'Interpersonal Intelligence' => 'Strong ability in understanding and interacting with others. Good at communication, empathy, and group collaboration. Tends to learn best through group activities and dialogues.',
+        'Intrapersonal Intelligence' => 'Strong ability in self-reflection and awareness of inner feelings. Tends to learn best through independent study and self-paced instruction.',
+        'Musical Intelligence' => 'Strong ability in rhythm, music, and hearing. Tends to learn best through songs, patterns, rhythms, and musical expression.',
+        'Naturalistic Intelligence' => 'Strong ability in understanding nature and the environment. Tends to learn best through nature activities, classification, and interaction with the natural world.'
+    );
+}
+
+function get_passing_score($con) {
+    return floatval(get_setting($con, 'passing_score', '50'));
+}
+
+function is_passed($score, $total, $con) {
+    if ($total <= 0) {
+        return false;
+    }
+    $percent = ($score / $total) * 100;
+    $passing = get_passing_score($con);
+    return $percent >= $passing;
+}
+
 function analyze_top_intelligences($category_scores) {
     $map = array(
         'Remember' => array('Verbal–Linguistic Intelligence', 'Logical–Mathematical Intelligence'),
