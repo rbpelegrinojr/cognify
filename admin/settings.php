@@ -10,9 +10,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     $exists = mysqli_query($con, "SELECT setting_id FROM settings WHERE setting_key = 'quiz_question_limit' LIMIT 1");
     if ($exists && mysqli_num_rows($exists) > 0) {
-        mysqli_query($con, "UPDATE settings SET setting_value = '$limit' WHERE setting_key = 'quiz_question_limit'");
+        mysqli_query($con, "UPDATE settings SET setting_value = '" . mysqli_real_escape_string($con, $limit) . "' WHERE setting_key = 'quiz_question_limit'");
     } else {
-        mysqli_query($con, "INSERT INTO settings (setting_key, setting_value) VALUES ('quiz_question_limit', '$limit')");
+        mysqli_query($con, "INSERT INTO settings (setting_key, setting_value) VALUES ('quiz_question_limit', '" . mysqli_real_escape_string($con, $limit) . "')");
     }
 
     $passing = floatval($_POST['passing_score']);
@@ -22,9 +22,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     $exists_ps = mysqli_query($con, "SELECT setting_id FROM settings WHERE setting_key = 'passing_score' LIMIT 1");
     if ($exists_ps && mysqli_num_rows($exists_ps) > 0) {
-        mysqli_query($con, "UPDATE settings SET setting_value = '$passing' WHERE setting_key = 'passing_score'");
+        mysqli_query($con, "UPDATE settings SET setting_value = '" . mysqli_real_escape_string($con, $passing) . "' WHERE setting_key = 'passing_score'");
     } else {
-        mysqli_query($con, "INSERT INTO settings (setting_key, setting_value) VALUES ('passing_score', '$passing')");
+        mysqli_query($con, "INSERT INTO settings (setting_key, setting_value) VALUES ('passing_score', '" . mysqli_real_escape_string($con, $passing) . "')");
     }
 
     set_flash('success', 'Quiz settings updated.');
